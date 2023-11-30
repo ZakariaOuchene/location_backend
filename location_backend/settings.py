@@ -130,7 +130,7 @@ TEMPLATES = [
     },
 ]
 
-AUTH_USER_MODEL = "location_api.User"
+AUTH_USER_MODEL = "location_api.Manager"
 
 WSGI_APPLICATION = 'location_backend.wsgi.application'
 

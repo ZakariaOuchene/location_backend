@@ -5,7 +5,6 @@ from .models import User, Manager, Car, CarImage, PickupPoint, Booking, Tarifs, 
 admin.site.register(User)
 admin.site.register(Manager)
 admin.site.register(Car)
-admin.site.register(Manager)
 admin.site.register(CarImage)
 admin.site.register(PickupPoint)
 admin.site.register(Booking)
