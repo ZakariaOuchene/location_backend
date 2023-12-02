@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
+from django.conf import settings
 
 
 class Manager(AbstractBaseUser):
@@ -129,3 +130,12 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment for Booking {self.booking.id}"
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField()
+    comment = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date}"
