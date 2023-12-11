@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Manager, Car, CarImage, PickupPoint, Booking, Tarifs, Paiement, Payment, Review
+from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Paiement, Payment, Review, Client
 
 class UserSer(serializers.ModelSerializer):
     class Meta:
@@ -12,13 +12,12 @@ class ManagerSer(serializers.ModelSerializer):
         model = Manager
         fields = "__all__"
         
-class CarImageSer(serializers.ModelSerializer):
+class ClientSer(serializers.ModelSerializer):
     class Meta:
-        model = CarImage
+        model = Client
         fields = "__all__"
 
 class CarSer(serializers.ModelSerializer):
-    images = CarImageSer(many=True, read_only=True)
     class Meta:
         model = Car
         fields = "__all__"
@@ -29,8 +28,10 @@ class PickupPointSer(serializers.ModelSerializer):
         fields = "__all__"
 
 class BookingSer(serializers.ModelSerializer):
-    name_pickup_start = serializers.IntegerField(source='PickupPoint.lieu', read_only=True)
-    name_pickup_start = serializers.IntegerField(source='PickupPoint.lieu', read_only=True)
+    name_pickup_start = serializers.CharField(source='PickupPoint.lieu', read_only=True)
+    name_pickup_start = serializers.CharField(source='PickupPoint.lieu', read_only=True)
+    name_car = serializers.CharField(source='Car.brand', read_only=True)
+    
     class Meta:
         model = Booking
         fields = "__all__"
@@ -50,6 +51,11 @@ class PaymentSer(serializers.ModelSerializer):
         model = Payment
         fields = "__all__"
 
+class ReviewSer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = "__all__"
+        
 class ReviewSer(serializers.ModelSerializer):
     class Meta:
         model = Review

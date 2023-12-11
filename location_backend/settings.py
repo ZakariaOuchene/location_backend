@@ -17,6 +17,12 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -64,6 +70,7 @@ INSTALLED_APPS = [
     "pymysql",
     "corsheaders",
     "rest_framework",
+    "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "location_api.apps.LocationApiConfig"
 ]
@@ -75,6 +82,7 @@ SESSION_CACHE_ALIAS = "default"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        'rest_framework.authentication.TokenAuthentication',
     )
 }
 
@@ -110,6 +118,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'location_backend.urls'
@@ -130,9 +139,10 @@ TEMPLATES = [
     },
 ]
 
-AUTH_USER_MODEL = "location_api.Manager"
+AUTH_USER_MODEL = "location_api.User"
 
 WSGI_APPLICATION = 'location_backend.wsgi.application'
+ASGI_APPLICATION = 'location_backend.asgi.application'
 
 
 # Database
