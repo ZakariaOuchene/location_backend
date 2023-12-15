@@ -6,8 +6,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import check_password
 from rest_framework import permissions, viewsets, status
 from rest_framework.exceptions import PermissionDenied
-from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Paiement, Payment, Review, Client
-from .serializers import UserSer, ManagerSer, CarSer, PickupPointSer, BookingSer, TarifsSer, PaiementSer, PaymentSer, ClientSer
+from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Review, ChildChair
+from .serializers import UserSer, ManagerSer, CarSer, PickupPointSer, BookingSer, TarifsSer, ChildChairSer
 from .serializers import ReviewSer
 
 class IsAuthenticatedOrDenied(permissions.BasePermission):
@@ -21,10 +21,6 @@ class IsAuthenticatedOrDenied(permissions.BasePermission):
 class UserView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSer
-    
-class ClientView(viewsets.ModelViewSet):
-    queryset = Client.objects.all()
-    serializer_class = ClientSer
 
 class ManagerView(viewsets.ModelViewSet):
     queryset = Manager.objects.all()
@@ -56,7 +52,7 @@ class ManagerTokenObtainPairView(TokenObtainPairView):
             user = User.objects.select_related("manager").get(code=code)
             manager = user.manager
 
-            if manager and manager.etat:
+            if manager :
                 if check_password(password, user.password):
                     refresh = RefreshToken.for_user(user)
                     return Response(
@@ -95,6 +91,10 @@ class CarView(viewsets.ModelViewSet):
 class PickupPointView(viewsets.ModelViewSet):
     queryset = PickupPoint.objects.all()
     serializer_class = PickupPointSer
+    
+class ChildChairView(viewsets.ModelViewSet):
+    queryset = ChildChair.objects.all()
+    serializer_class = ChildChairSer
 
 class BookingView(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
@@ -103,14 +103,6 @@ class BookingView(viewsets.ModelViewSet):
 class TarifsView(viewsets.ModelViewSet):
     queryset = Tarifs.objects.all()
     serializer_class = TarifsSer
-
-class PaiementView(viewsets.ModelViewSet):
-    queryset = Paiement.objects.all()
-    serializer_class = PaiementSer
-
-class PaymentView(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSer
 
 class ReviewView(viewsets.ModelViewSet):
     queryset = Review.objects.all()

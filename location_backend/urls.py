@@ -7,17 +7,15 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from location_api import views
-from location_api.views import (ManagerView, CarView, PickupPointView, BookingView, TarifsView, PaiementView, PaymentView, ReviewView, ClientView)
+from location_api.views import (ManagerView, CarView, PickupPointView, BookingView, TarifsView, ReviewView, ChildChairView)
 
 router = routers.DefaultRouter()
 router.register(r"managers", ManagerView, basename="managers")
-router.register(r"clients", ClientView, basename="users")
 router.register(r"cars", CarView, basename="cars")
 router.register(r"pickup-point", PickupPointView, basename="pickup-point")
+router.register(r"child-chair", ChildChairView, basename="child-chair")
 router.register(r"booking", BookingView, basename="booking")
 router.register(r"tarifs", TarifsView, basename="tarifs")
-router.register(r"card-paiement", PaiementView, basename="card-paiement")
-router.register(r"paiemnet-booking", PaymentView, basename="paiemnet-booking")
 router.register(r"reviews", ReviewView, basename="reviews")
 
 urlpatterns = [

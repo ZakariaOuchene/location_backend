@@ -44,7 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         # Generate the code if it's a new user
         if not self.pk:
 
-            prefix = 'CL' if isinstance(self, Client) else 'AD'
+            prefix = 'AD'
 
             max_code = User.objects.filter(code__startswith=prefix).order_by(
                 '-code').values_list('code', flat=True).first()
@@ -85,21 +85,10 @@ class Manager(User):
     role = models.CharField(max_length=15, choices=ROLE_CHOICES, default="ADMIN")
 
     def __str__(self):
-
-        return self.email
-    
-class Client(User):
-    tel = models.CharField(max_length=25, blank=True)
-    pays = models.CharField(max_length=255, blank=True)
-    birthday = models.DateField()
-    license_number = models.CharField(max_length=50)
-    cin_passport = models.CharField(max_length=50, blank=True)
-    paiement = models.ManyToManyField('Paiement', related_name='client', blank=True)
-    
-    def __str__(self):
         return self.email
 
 class Car(models.Model):
+    id_car = models.AutoField(primary_key=True)
     brand = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
     year = models.IntegerField()
@@ -108,7 +97,7 @@ class Car(models.Model):
     matricule = models.CharField(max_length=50)
     passenger_number = models.IntegerField()
     air_conditioning = models.BooleanField(default=False)
-    disponibilte = models.BooleanField(default=True)
+    disponible = models.BooleanField(default=True)
     FUEL_CHOICES = (
         ("ESSENCE", "ESSENCE"),
         ("DIESEL", "DIESEL"),
@@ -131,18 +120,17 @@ class PickupPoint(models.Model):
     tarif = models.DecimalField(max_digits=10, decimal_places=2)
     
 class Assurance(models.Model):
-    nom = models.CharField(max_length=255)
+    id_ass = models.AutoField(primary_key=True)
     prix_par_jour = models.IntegerField()
     
 class ChildChair(models.Model):
-    age = models.IntegerField()
+    age = models.CharField(max_length=100)
     prix_jrs = models.IntegerField()
     diponible = models.BooleanField(default=True)
     
 class Booking(models.Model):
     code_booking = models.CharField(max_length=7, unique=True, default="BK01")
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     assurance = models.ForeignKey(Assurance, on_delete=models.CASCADE, null=True, blank=True)
     childchair = models.ForeignKey(ChildChair, on_delete=models.CASCADE, null=True, blank=True)
     date_book = models.DateTimeField(auto_now_add=True)
@@ -153,8 +141,15 @@ class Booking(models.Model):
     nbr_jrs = models.IntegerField()
     pickup_start = models.ForeignKey(PickupPoint, on_delete=models.CASCADE, related_name='bookings_pickup_start')
     pickup_end = models.ForeignKey(PickupPoint, on_delete=models.CASCADE, related_name='bookings_pickup_end')
+    etat = models.BooleanField(default=False)
     payement = models.BooleanField(default=False)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=150)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    tel = models.CharField(max_length=25, blank=True)
+    pays = models.CharField(max_length=255, blank=True)
+    birthday = models.DateField()
+    cin_passport = models.CharField(max_length=50, blank=True)
     
     def save(self, *args, **kwargs):
         # Generate the code if it's a new complaint
@@ -173,30 +168,15 @@ class Booking(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.email} - {self.car} - {self.start_date} to {self.end_date}"
-
-class Paiement(models.Model):
-    name = models.CharField(max_length=30, blank=True)
-    numCard = models.CharField(max_length=20, blank=True)
-    expDate = models.CharField(max_length=7, blank=True)
-    securityCode = models.PositiveIntegerField(blank=False)
-
-    def __str__(self):
-        return self.name
-
-class Payment(models.Model):
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Payment for Booking {self.booking.id}"
+        return f"{self.cin_passport} - {self.car} - {self.start_date} to {self.end_date}"
 
 class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=255)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     rating = models.IntegerField()
     comment = models.TextField()
-    date = models.DateTimeField(auto_now_add=True)
+    date_review = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.date}"
+        return f"{self.email} - {self.date}"

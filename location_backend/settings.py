@@ -33,6 +33,10 @@ SECRET_KEY = 'django-insecure-kf$50$%0%(qz+r=)8%wc!1_qr5*fjbtm1jiw5zs*dll1cr6e_5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000","http://127.0.0.1:8000",
+]
+
 ALLOWED_HOSTS = ['*']
 
 CORS_ALLOW_METHODS = [
@@ -56,6 +60,7 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'Access-Control-Allow-Origin',
 ]
 
 # Application definition
@@ -72,7 +77,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
-    "location_api.apps.LocationApiConfig"
+    "location_api.apps.LocationApiConfig",
+    'channels'
 ]
 
 # Use Redis for session storage
@@ -87,9 +93,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=90),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=90),
-    "ROTATE_REFRESH_TOKENS": True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
+    "SLIDING_TOKEN_LIFETIME": timedelta(days=365),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=365),
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "ROTATE_REFRESH_TOKENS": False,
     "UPDATE_LAST_LOGIN": False,
     "ALGORITHM": "HS256",
     "VERIFYING_KEY": None,
@@ -105,9 +113,6 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_TYPE_CLAIM": "token_type",
     "JTI_CLAIM": "jti",
-    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 
 MIDDLEWARE = [
@@ -157,8 +162,9 @@ DATABASES = {
         "HOST": "localhost",
         "PORT": "3306",
         "OPTIONS": {
-        "charset": "utf8mb4",
-        'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                "charset": "utf8mb4",
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                # "init_command": "SET NAMES utf8mb4",
         }
     },
 }
@@ -205,3 +211,14 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+
+
+        },
+    },
+}

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Paiement, Payment, Review, Client
+from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Review, ChildChair
 
 class UserSer(serializers.ModelSerializer):
     class Meta:
@@ -11,11 +11,6 @@ class ManagerSer(serializers.ModelSerializer):
     class Meta:
         model = Manager
         fields = "__all__"
-        
-class ClientSer(serializers.ModelSerializer):
-    class Meta:
-        model = Client
-        fields = "__all__"
 
 class CarSer(serializers.ModelSerializer):
     class Meta:
@@ -25,6 +20,11 @@ class CarSer(serializers.ModelSerializer):
 class PickupPointSer(serializers.ModelSerializer):
     class Meta:
         model = PickupPoint
+        fields = "__all__"
+        
+class ChildChairSer(serializers.ModelSerializer):
+    class Meta:
+        model = ChildChair
         fields = "__all__"
 
 class BookingSer(serializers.ModelSerializer):
@@ -40,22 +40,7 @@ class TarifsSer(serializers.ModelSerializer):
     class Meta:
         model = Tarifs
         fields = "__all__"
-        
-class PaiementSer(serializers.ModelSerializer):
-    class Meta:
-        model = Paiement
-        fields = "__all__"
-        
-class PaymentSer(serializers.ModelSerializer):
-    class Meta:
-        model = Payment
-        fields = "__all__"
 
-class ReviewSer(serializers.ModelSerializer):
-    class Meta:
-        model = Review
-        fields = "__all__"
-        
 class ReviewSer(serializers.ModelSerializer):
     class Meta:
         model = Review
