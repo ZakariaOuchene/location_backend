@@ -25,11 +25,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         ("Homme", "Homme"),
     )
     email = models.EmailField(max_length=255)
+    username = models.CharField(max_length=30, blank=True, null=True)
     code = models.CharField(max_length=10, unique=True, default="AD01")
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=150)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     date_creation = models.DateTimeField(auto_now_add=True)
+    ville = models.CharField(max_length=255, blank=True)
+    tel = models.CharField(max_length=25, blank=True)
+    image = models.ImageField(
+        upload_to="avatars/",
+        blank=True,
+        null=True,
+    )
     
     objects = UserManager()
 
@@ -55,19 +63,14 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.code = f"{prefix}{sequence_number:02d}"
 
         # # image
+        if self.id:
 
-        # if self.id:
-
-        #     old_instance = User.objects.get(id=self.id)
-        #     if self.image != old_instance.image:
-        #         if (
-        #             old_instance.image
-        #         ):
-        #             os.remove(old_instance.image.path)
-        # if self.is_seller:
-        #     # If the user is a seller, ensure that the required seller fields are not blank or null
-        #     if not self.rue or not self.pays:
-        #         raise ValueError("Seller fields are required for sellers.")
+            old_instance = User.objects.get(id=self.id)
+            if self.image != old_instance.image:
+                if (
+                    old_instance.image
+                ):
+                    os.remove(old_instance.image.path)
 
         if self.first_name and self.last_name:
             self.username = f"{self.first_name}_{self.last_name}"
@@ -83,6 +86,7 @@ class Manager(User):
         ("ADMIN", "ADMIN"),
     )
     role = models.CharField(max_length=15, choices=ROLE_CHOICES, default="ADMIN")
+    etat = models.BooleanField(default=True)
 
     def __str__(self):
         return self.email
@@ -143,13 +147,22 @@ class Booking(models.Model):
     pickup_end = models.ForeignKey(PickupPoint, on_delete=models.CASCADE, related_name='bookings_pickup_end')
     etat = models.BooleanField(default=False)
     payement = models.BooleanField(default=False)
+    surPlace = models.BooleanField(default=False)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=150)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     tel = models.CharField(max_length=25, blank=True)
-    pays = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(max_length=255, blank=True,)
+    pays = models.CharField(max_length=50, blank=True)
+    codePostal = models.CharField(max_length=255, blank=True, null=True)
+    ville = models.CharField(max_length=255, blank=True, null=True)
     birthday = models.DateField()
     cin_passport = models.CharField(max_length=50, blank=True)
+    GENDER_CHOICES = (
+        ("Femme", "Femme"),
+        ("Homme", "Homme"),
+    )
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     
     def save(self, *args, **kwargs):
         # Generate the code if it's a new complaint

@@ -23,6 +23,11 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('', include(router.urls)),
     
+    path("user_update/<int:user_id>/", views.update_user, name="update_user"),
+    path("user_image_update/<int:user_id>/",
+         views.update_user_image, name="update_user_image"),
+    path('change_password/<int:userId>/',
+         views.change_password, name='change_password'),
     path("token/manager/", views.ManagerTokenObtainPairView.as_view(),name="manager_token_obtain_pair"),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
