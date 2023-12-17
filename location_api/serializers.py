@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Review, ChildChair
+from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Review
 
 class UserSer(serializers.ModelSerializer):
     class Meta:
@@ -21,16 +21,11 @@ class PickupPointSer(serializers.ModelSerializer):
     class Meta:
         model = PickupPoint
         fields = "__all__"
-        
-class ChildChairSer(serializers.ModelSerializer):
-    class Meta:
-        model = ChildChair
-        fields = "__all__"
 
 class BookingSer(serializers.ModelSerializer):
-    name_pickup_start = serializers.CharField(source='PickupPoint.lieu', read_only=True)
-    name_pickup_start = serializers.CharField(source='PickupPoint.lieu', read_only=True)
-    name_car = serializers.CharField(source='Car.brand', read_only=True)
+    name_pickup_start = serializers.CharField(source='pickup_start.lieu', read_only=True)
+    name_pickup_end = serializers.CharField(source='pickup_end.lieu', read_only=True)
+    name_car = serializers.CharField(source='car.model', read_only=True)
     
     class Meta:
         model = Booking

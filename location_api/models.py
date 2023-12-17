@@ -102,6 +102,11 @@ class Car(models.Model):
     passenger_number = models.IntegerField()
     air_conditioning = models.BooleanField(default=False)
     disponible = models.BooleanField(default=True)
+    GREARBOX_CHOICES = (
+        ("MANUELLE", "MANUELLE"),
+        ("AUTOMATIQUE", "AUTOMATIQUE"),
+    )
+    gearBox =  models.TextField(max_length=50, choices=GREARBOX_CHOICES)
     FUEL_CHOICES = (
         ("ESSENCE", "ESSENCE"),
         ("DIESEL", "DIESEL"),
@@ -114,29 +119,24 @@ class Car(models.Model):
 class Tarifs(models.Model):
     id_tarif = models.AutoField(primary_key=True)
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    max_duration = models.IntegerField()
-    min_duration = models.IntegerField()
-    price_per_day = models.IntegerField()
+    price_more_month = models.IntegerField()
+    price_week= models.IntegerField()
+    price_tree_days = models.IntegerField()
+    price_two_week = models.IntegerField()
+    price_more_two_week = models.IntegerField()
     
 class PickupPoint(models.Model):
     id_pickup = models.AutoField(primary_key=True)
     lieu = models.CharField(max_length=100)
     tarif = models.DecimalField(max_digits=10, decimal_places=2)
     
-class Assurance(models.Model):
-    id_ass = models.AutoField(primary_key=True)
-    prix_par_jour = models.IntegerField()
-    
-class ChildChair(models.Model):
-    age = models.CharField(max_length=100)
-    prix_jrs = models.IntegerField()
-    diponible = models.BooleanField(default=True)
-    
 class Booking(models.Model):
-    code_booking = models.CharField(max_length=7, unique=True, default="BK01")
+    code = models.CharField(max_length=7, unique=True, default="BK01")
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    assurance = models.ForeignKey(Assurance, on_delete=models.CASCADE, null=True, blank=True)
-    childchair = models.ForeignKey(ChildChair, on_delete=models.CASCADE, null=True, blank=True)
+    assurance = models.BooleanField(default=False)
+    childchair = models.IntegerField(default=0)
+    rehausseur = models.IntegerField(default=0)
+    conducteur = models.BooleanField(default=False)
     date_book = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField()
     end_date = models.DateField()
@@ -145,7 +145,6 @@ class Booking(models.Model):
     nbr_jrs = models.IntegerField()
     pickup_start = models.ForeignKey(PickupPoint, on_delete=models.CASCADE, related_name='bookings_pickup_start')
     pickup_end = models.ForeignKey(PickupPoint, on_delete=models.CASCADE, related_name='bookings_pickup_end')
-    etat = models.BooleanField(default=False)
     payement = models.BooleanField(default=False)
     surPlace = models.BooleanField(default=False)
     first_name = models.CharField(max_length=30)
@@ -187,7 +186,6 @@ class Review(models.Model):
     email = models.EmailField(max_length=255)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    rating = models.IntegerField()
     comment = models.TextField()
     date_review = models.DateTimeField(auto_now_add=True)
 

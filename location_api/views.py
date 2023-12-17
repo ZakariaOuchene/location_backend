@@ -6,11 +6,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import check_password
 from rest_framework import permissions, viewsets, status
 from rest_framework.exceptions import PermissionDenied
-from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Review, ChildChair
-from .serializers import UserSer, ManagerSer, CarSer, PickupPointSer, BookingSer, TarifsSer, ChildChairSer
+from .models import User, Manager, Car, PickupPoint, Booking, Tarifs, Review
+from .serializers import UserSer, ManagerSer, CarSer, PickupPointSer, BookingSer, TarifsSer
 from .serializers import ReviewSer
 from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.decorators import action
+from django.db.models import Sum, F
 
 class IsAuthenticatedOrDenied(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -138,18 +141,51 @@ def change_password(request, userId):
 class CarView(viewsets.ModelViewSet):
     queryset = Car.objects.all()
     serializer_class = CarSer
+    
+    @action(detail=False, methods=['get'])
+    def total_cars(self, request):
+        total_cars = Car.objects.count()
+        return Response({'total_cars': total_cars})
+    
+class TarifByCaryView(APIView):
+    def get(self, request, id_car):
+        # Retrieve the properties for the given category id
+        print("Received poid ID:", id_car)
+        tarif = Tarifs.objects.filter(car=id_car)
+        serializer = TarifsSer(tarif, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class PickupPointView(viewsets.ModelViewSet):
     queryset = PickupPoint.objects.all()
     serializer_class = PickupPointSer
-    
-class ChildChairView(viewsets.ModelViewSet):
-    queryset = ChildChair.objects.all()
-    serializer_class = ChildChairSer
 
 class BookingView(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSer
+    
+    @action(detail=False, methods=['get'])
+    def total_booking_surplace(self, request):
+        total_booking_surplace = Booking.objects.filter(surPlace=True).count()
+        return Response({'total_booking_surplace': total_booking_surplace})
+    
+    @action(detail=False, methods=['get'])
+    def total_reviews_enligne(self, request):
+        total_reviews_enligne = Booking.objects.filter(surPlace=False).count()
+        return Response({'total_reviews_enligne': total_reviews_enligne})
+    
+    @action(detail=False, methods=['get'])
+    def total_revenue(self, request):
+        total_paiement_sur_place = Booking.objects.filter(surPlace=True, payement=True).aggregate(Sum('total_price'))['total_price__sum'] or 0
+        total_paiement_en_ligne = Booking.objects.filter(surPlace=False, payement=True).aggregate(Sum('total_price'))['total_price__sum'] or 0
+        total_paiement = Booking.objects.filter(payement=True).aggregate(Sum('total_price'))['total_price__sum'] or 0
+
+        response_data = {
+            'total_paiement_sur_place': total_paiement_sur_place,
+            'total_paiement_en_ligne': total_paiement_en_ligne,
+            'total_paiement': total_paiement,
+        }
+
+        return Response(response_data)
 
 class TarifsView(viewsets.ModelViewSet):
     queryset = Tarifs.objects.all()
@@ -158,3 +194,8 @@ class TarifsView(viewsets.ModelViewSet):
 class ReviewView(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSer
+    
+    @action(detail=False, methods=['get'])
+    def total_reviews(self, request):
+        total_reviews = Review.objects.count()
+        return Response({'total_reviews': total_reviews})
