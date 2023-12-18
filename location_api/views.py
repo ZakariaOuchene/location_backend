@@ -186,6 +186,18 @@ class BookingView(viewsets.ModelViewSet):
         }
 
         return Response(response_data)
+    
+class BookingSurPlace(APIView):
+    def get(self, request, *args, **kwargs):
+        booking_sur_place = Booking.objects.filter(surPlace=True)
+        serializer = BookingSer(booking_sur_place, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class BookingEnLigne(APIView):
+    def get(self, request, *args, **kwargs):
+        booking_en_ligne = Booking.objects.filter(surPlace=False)
+        serializer = BookingSer(booking_en_ligne, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TarifsView(viewsets.ModelViewSet):
     queryset = Tarifs.objects.all()

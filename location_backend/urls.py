@@ -32,4 +32,8 @@ urlpatterns = [
     path("tarif/car/<int:id_car>/",
          views.TarifByCaryView.as_view(), name="get_tarif_by_car"),
     
+    path('booking-sur-place/', views.BookingSurPlace.as_view(), name='booking_sur_place'),
+    
+    path('booking-en-ligne/', views.BookingEnLigne.as_view(), name='booking_en_ligne'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
