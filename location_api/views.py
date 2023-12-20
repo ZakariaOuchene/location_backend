@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from django.db.models import Sum, F
+from django.core.exceptions import ObjectDoesNotExist
 
 class IsAuthenticatedOrDenied(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -165,19 +166,19 @@ class BookingView(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def total_booking_surplace(self, request):
-        total_booking_surplace = Booking.objects.filter(surPlace=True).count()
+        total_booking_surplace = Booking.objects.filter(surPlace=True, repayment=False).count()
         return Response({'total_booking_surplace': total_booking_surplace})
     
     @action(detail=False, methods=['get'])
     def total_reviews_enligne(self, request):
-        total_reviews_enligne = Booking.objects.filter(surPlace=False).count()
+        total_reviews_enligne = Booking.objects.filter(surPlace=False, repayment=False).count()
         return Response({'total_reviews_enligne': total_reviews_enligne})
     
     @action(detail=False, methods=['get'])
     def total_revenue(self, request):
-        total_paiement_sur_place = Booking.objects.filter(surPlace=True, payement=True).aggregate(Sum('total_price'))['total_price__sum'] or 0
-        total_paiement_en_ligne = Booking.objects.filter(surPlace=False, payement=True).aggregate(Sum('total_price'))['total_price__sum'] or 0
-        total_paiement = Booking.objects.filter(payement=True).aggregate(Sum('total_price'))['total_price__sum'] or 0
+        total_paiement_sur_place = Booking.objects.filter(surPlace=True, payement=True, repayment=False).aggregate(Sum('total_price'))['total_price__sum'] or 0
+        total_paiement_en_ligne = Booking.objects.filter(surPlace=False, payement=True, repayment=False).aggregate(Sum('total_price'))['total_price__sum'] or 0
+        total_paiement = Booking.objects.filter(payement=True, repayment=False).aggregate(Sum('total_price'))['total_price__sum'] or 0
 
         response_data = {
             'total_paiement_sur_place': total_paiement_sur_place,
@@ -187,17 +188,74 @@ class BookingView(viewsets.ModelViewSet):
 
         return Response(response_data)
     
+class BookingArchive(APIView):
+    def get(self, request, *args, **kwargs):
+        booking_archive = Booking.objects.filter(archive=True).order_by('-date_book')
+        serializer = BookingSer(booking_archive, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 class BookingSurPlace(APIView):
     def get(self, request, *args, **kwargs):
-        booking_sur_place = Booking.objects.filter(surPlace=True)
+        booking_sur_place = Booking.objects.filter(surPlace=True, archive=False).order_by('-date_book')
         serializer = BookingSer(booking_sur_place, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class BookingEnLigne(APIView):
     def get(self, request, *args, **kwargs):
-        booking_en_ligne = Booking.objects.filter(surPlace=False)
+        booking_en_ligne = Booking.objects.filter(surPlace=False, archive=False).order_by('-date_book')
         serializer = BookingSer(booking_en_ligne, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+@api_view(['PUT'])
+#@permission_classes([IsAuthenticated])
+def update_paiement_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+    except Booking.DoesNotExist:
+        return Response({"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        booking.payement = not booking.payement  # Toggle the etat field
+        booking.save(update_fields=['payement'])
+
+        serializer = BookingSer(booking)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    return Response({"error": "Invalid request method"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+#@permission_classes([IsAuthenticated])
+def update_repaiement_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+    except Booking.DoesNotExist:
+        return Response({"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        booking.repayment = not booking.repayment  # Toggle the etat field
+        booking.save(update_fields=['repayment'])
+
+        serializer = BookingSer(booking)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    return Response({"error": "Invalid request method"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+#@permission_classes([IsAuthenticated])
+def update_archive_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+    except Booking.DoesNotExist:
+        return Response({"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        booking.archive = not booking.archive  # Toggle the etat field
+        booking.save(update_fields=['archive'])
+
+        serializer = BookingSer(booking)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    return Response({"error": "Invalid request method"}, status=status.HTTP_400_BAD_REQUEST)
 
 class TarifsView(viewsets.ModelViewSet):
     queryset = Tarifs.objects.all()

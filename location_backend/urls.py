@@ -36,4 +36,12 @@ urlpatterns = [
     
     path('booking-en-ligne/', views.BookingEnLigne.as_view(), name='booking_en_ligne'),
     
+    path('booking-archive/', views.BookingArchive.as_view(), name='booking_archive'),
+    
+    path('booking/update-paiement/<int:booking_id>/', views.update_paiement_booking, name='update_paiement_booking'),
+    
+    path('booking/update-repaiement/<int:booking_id>/', views.update_repaiement_booking, name='update_repaiement_booking'),
+    
+    path('booking/update-archive/<int:booking_id>/', views.update_archive_booking, name='update_archive_booking'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
