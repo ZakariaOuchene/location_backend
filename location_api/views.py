@@ -15,6 +15,12 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from django.db.models import Sum, F
 from django.core.exceptions import ObjectDoesNotExist
+import logging
+from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
+from django.db.models.functions import TruncMonth, TruncYear
+
+logger = logging.getLogger(__name__)
 
 class IsAuthenticatedOrDenied(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -27,6 +33,30 @@ class IsAuthenticatedOrDenied(permissions.BasePermission):
 class UserView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSer
+    
+# class UserDetailsAPIView(APIView):
+#     permission_classes = [IsAuthenticatedOrDenied]
+
+#     def get(self, request):
+#         user = request.user
+#         serializer = UserSer(user)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class UserDetailsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            if request.user.is_authenticated:
+                user = request.user
+                serializer = UserSer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                logger.warning("Authentication credentials were not provided.")
+                return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            logger.error(f"Error in UserDetailsAPIView: {e}")
+            return Response({"detail": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ManagerView(viewsets.ModelViewSet):
     queryset = Manager.objects.all()
@@ -188,6 +218,120 @@ class BookingView(viewsets.ModelViewSet):
 
         return Response(response_data)
     
+    @action(detail=False, methods=["get"])
+    def total_frais_surplace_by_month(self, request):
+        # Obtenez l'année à partir des paramètres de requête ou utilisez l'année actuelle par défaut
+        year = request.GET.get('year', timezone.now().year)
+        # Utilisez la fonction aggregate pour calculer la somme des fraisElbal par mois
+        frais_surplace_by_month = (
+            Booking.objects
+            # Filtrez les booking
+            .filter(payement=True, surPlace=True, date_book__year=year)
+            .annotate(month=TruncMonth('date_book'))
+            .values('month')
+            .annotate(total_frais_surplace=Sum(F('total_price_HT')))
+            .order_by('month')
+        )
+        # Sérialisez les données
+        data = [{'month': entry['month'].strftime(
+            '%m'), 'total_frais_surplace': entry['total_frais_surplace']} for entry in frais_surplace_by_month]
+
+        return JsonResponse(data, safe=False)
+    
+    @action(detail=False, methods=["get"])
+    def total_frais_surplace_by_year(self, request):
+        # Utilisez la fonction aggregate pour calculer la somme des fraisElbal par mois
+        frais_surplace_by_year = (
+            Booking.objects
+            # Filtrez les booking
+            .filter(payement=True, surPlace=True)
+            .annotate(year=TruncYear('date_book'))
+            .values('year')
+            .annotate(total_frais_surplace=Sum(F('total_price_HT')))
+            .order_by('year')
+        )
+        # Sérialisez les données
+        data = [{'year': entry['year'].strftime(
+            '%Y'), 'total_frais_surplace': entry['total_frais_surplace']} for entry in frais_surplace_by_year]
+
+        return JsonResponse(data, safe=False)
+    
+    @action(detail=False, methods=["get"])
+    def total_frais_enligne_by_month(self, request):
+        # Obtenez l'année à partir des paramètres de requête ou utilisez l'année actuelle par défaut
+        year = request.GET.get('year', timezone.now().year)
+        # Utilisez la fonction aggregate pour calculer la somme des fraisElbal par mois
+        frais_enligne_by_month = (
+            Booking.objects
+            # Filtrez les booking
+            .filter(payement=True, surPlace=False, repayment=False, date_book__year=year)
+            .annotate(month=TruncMonth('date_book'))
+            .values('month')
+            .annotate(total_frais_enligne=Sum(F('total_price_HT')))
+            .order_by('month')
+        )
+        # Sérialisez les données
+        data = [{'month': entry['month'].strftime(
+            '%m'), 'total_frais_enligne': entry['total_frais_enligne']} for entry in frais_enligne_by_month]
+
+        return JsonResponse(data, safe=False)
+    
+    @action(detail=False, methods=["get"])
+    def total_frais_enligne_by_year(self, request):
+        # Utilisez la fonction aggregate pour calculer la somme des fraisElbal par mois
+        frais_enligne_by_year = (
+            Booking.objects
+            # Filtrez les booking
+            .filter(payement=True, surPlace=False, repayment=False)
+            .annotate(year=TruncYear('date_book'))
+            .values('year')
+            .annotate(total_frais_enligne=Sum(F('total_price_HT')))
+            .order_by('year')
+        )
+        # Sérialisez les données
+        data = [{'year': entry['year'].strftime(
+            '%Y'), 'total_frais_enligne': entry['total_frais_enligne']} for entry in frais_enligne_by_year]
+
+        return JsonResponse(data, safe=False)
+    
+    @action(detail=False, methods=["get"])
+    def total_frais_all_by_month(self, request):
+        # Obtenez l'année à partir des paramètres de requête ou utilisez l'année actuelle par défaut
+        year = request.GET.get('year', timezone.now().year)
+        # Utilisez la fonction aggregate pour calculer la somme des fraisElbal par mois
+        frais_all_by_month = (
+            Booking.objects
+            # Filtrez les booking
+            .filter(payement=True, repayment=False, date_book__year=year)
+            .annotate(month=TruncMonth('date_book'))
+            .values('month')
+            .annotate(total_frais_all=Sum(F('total_price_HT')))
+            .order_by('month')
+        )
+        # Sérialisez les données
+        data = [{'month': entry['month'].strftime(
+            '%m'), 'total_frais_all': entry['total_frais_all']} for entry in frais_all_by_month]
+
+        return JsonResponse(data, safe=False)
+    
+    @action(detail=False, methods=["get"])
+    def total_frais_all_by_year(self, request):
+        # Utilisez la fonction aggregate pour calculer la somme des fraisElbal par mois
+        frais_all_by_year = (
+            Booking.objects
+            # Filtrez les booking
+            .filter(payement=True, repayment=False)
+            .annotate(year=TruncYear('date_book'))
+            .values('year')
+            .annotate(total_frais_all=Sum(F('total_price_HT')))
+            .order_by('year')
+        )
+        # Sérialisez les données
+        data = [{'year': entry['year'].strftime(
+            '%Y'), 'total_frais_all': entry['total_frais_all']} for entry in frais_all_by_year]
+
+        return JsonResponse(data, safe=False)
+    
 class BookingArchive(APIView):
     def get(self, request, *args, **kwargs):
         booking_archive = Booking.objects.filter(archive=True).order_by('-date_book')
@@ -269,3 +413,20 @@ class ReviewView(viewsets.ModelViewSet):
     def total_reviews(self, request):
         total_reviews = Review.objects.count()
         return Response({'total_reviews': total_reviews})
+    
+@api_view(['PUT'])
+#@permission_classes([IsAuthenticated])
+def update_dispo_car(request, car_id):
+    try:
+        car = Car.objects.get(id_car=car_id)
+    except Car.DoesNotExist:
+        return Response({"error": "Car not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        car.disponible = not car.disponible  # Toggle the etat field
+        car.save(update_fields=['disponible'])
+
+        serializer = CarSer(car)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    return Response({"error": "Invalid request method"}, status=status.HTTP_400_BAD_REQUEST)

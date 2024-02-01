@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('', include(router.urls)),
-    
+    path("auth/user/", views.UserDetailsAPIView.as_view(), name="user_detail"),
     path("user_update/<int:user_id>/", views.update_user, name="update_user"),
     path("user_image_update/<int:user_id>/",
          views.update_user_image, name="update_user_image"),
@@ -43,5 +43,7 @@ urlpatterns = [
     path('booking/update-repaiement/<int:booking_id>/', views.update_repaiement_booking, name='update_repaiement_booking'),
     
     path('booking/update-archive/<int:booking_id>/', views.update_archive_booking, name='update_archive_booking'),
+    
+    path('car/update-dispo-car/<int:car_id>/', views.update_dispo_car, name='update_dispo_car'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

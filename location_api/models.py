@@ -2,6 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 import os
 from django.contrib.auth.hashers import make_password
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 class UserManager(BaseUserManager):
 
@@ -184,6 +189,17 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.cin_passport} - {self.car} - {self.start_date} to {self.end_date}"
+    
+    # @receiver(post_save, sender=Booking)
+    # def send_booking_confirmation_email(sender, instance, created, **kwargs):
+    #     if created:
+    #         subject = 'Confirmation de réservation'
+    #         message = render_to_string('booking_confirmation_email.html', {'booking': instance})
+    #         plain_message = strip_tags(message)
+    #         from_email = 'your_email@example.com'  # Replace with your email
+    #         to_email = [instance.email]
+
+    #         send_mail(subject, plain_message, from_email, to_email, html_message=message)
 
 class Review(models.Model):
     email = models.EmailField(max_length=255)

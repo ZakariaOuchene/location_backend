@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirmation de Réservation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+
+        footer {
+            margin-top: 20px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #007BFF;">Thankyou for your reservation !</h1>
+    
+    <p>Hello {{ client_first_name }} {{ client_last_name }},</p>
+    
+    <p>Your reservation has been successfully confirmed. Here are the details of your reservation :</p>
+
+    <ul>
+        <li><strong>Car :</strong> {{ car_model }}</li>
+        <li><strong>Start date :</strong> {{ date_depart }}</li>
+        <li><strong>Departure locations :</strong> {{ lieux_depart }}</li>
+        <li><strong>End date :</strong> {{ date_fin }}</li>
+        <li><strong>Return locations :</strong> {{ lieux_retour }}</li>
+        <li><strong>Total prix :</strong> {{ total_prix }}</li>
+    </ul>
+
+    <p>Merci de nous avoir choisis. Nous avons hâte de vous accueillir!</p>
+
+    <footer>
+        <p>Cordialement,<br>
+        Australie Cars</p>
+    </footer>
+</body>
+</html>
