@@ -43,20 +43,13 @@ class UserView(viewsets.ModelViewSet):
 #         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class UserDetailsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticatedOrDenied]
+    permission_classes = [IsAuthenticatedOrDenied]
 
     def get(self, request):
-        try:
-            if request.user.is_authenticated:
-                user = request.user
-                serializer = UserSer(user)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                logger.warning("Authentication credentials were not provided.")
-                return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
-        except Exception as e:
-            logger.error(f"Error in UserDetailsAPIView: {e}")
-            return Response({"detail": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        user = request.user
+        serializer = UserSer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ManagerView(viewsets.ModelViewSet):
     queryset = Manager.objects.all()
