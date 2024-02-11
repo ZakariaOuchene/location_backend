@@ -223,6 +223,16 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Configurez les paramètres pour l'envoi d'e-mails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.australiecars.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'support@australiecars.com'
+EMAIL_HOST_PASSWORD = 'Australiecars123@'
+
+# Optionnel: Définissez l'adresse e-mail par défaut à partir de laquelle les e-mails seront envoyés
+DEFAULT_FROM_EMAIL = 'support@australiecars.com'
 
 
 

@@ -5,6 +5,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework import routers
 from django.conf.urls.static import static
 from django.conf import settings
+from django.views.generic.base import RedirectView
 
 from location_api import views
 from location_api.views import (ManagerView, CarView, PickupPointView, BookingView, TarifsView, ReviewView)
@@ -18,6 +19,7 @@ router.register(r"tarifs", TarifsView, basename="tarifs")
 router.register(r"reviews", ReviewView, basename="reviews")
 
 urlpatterns = [
+    # path('', RedirectView.as_view(url='/admin/login/?next=/'), name='root_redirect'),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('', include(router.urls)),

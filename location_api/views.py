@@ -19,6 +19,7 @@ import logging
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from django.db.models.functions import TruncMonth, TruncYear
+from .utils import send_booking_confirmation_email
 
 logger = logging.getLogger(__name__)
 
@@ -186,6 +187,18 @@ class PickupPointView(viewsets.ModelViewSet):
 class BookingView(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # Envoi de l'e-mail de confirmation
+        send_booking_confirmation_email(serializer.data)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
     
     @action(detail=False, methods=['get'])
     def total_booking_surplace(self, request):

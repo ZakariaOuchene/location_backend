@@ -121,6 +121,9 @@ class Car(models.Model):
     def __str__(self):
         return f"{self.year} {self.brand} {self.model}"
     
+    def get_brand_and_model(self):
+        return f"{self.brand} {self.model}"
+    
 class Tarifs(models.Model):
     id_tarif = models.AutoField(primary_key=True)
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
@@ -189,17 +192,6 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.cin_passport} - {self.car} - {self.start_date} to {self.end_date}"
-    
-    # @receiver(post_save, sender=Booking)
-    # def send_booking_confirmation_email(sender, instance, created, **kwargs):
-    #     if created:
-    #         subject = 'Confirmation de réservation'
-    #         message = render_to_string('booking_confirmation_email.html', {'booking': instance})
-    #         plain_message = strip_tags(message)
-    #         from_email = 'your_email@example.com'  # Replace with your email
-    #         to_email = [instance.email]
-
-    #         send_mail(subject, plain_message, from_email, to_email, html_message=message)
 
 class Review(models.Model):
     email = models.EmailField(max_length=255)
